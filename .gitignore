@@ -1,7 +1,32 @@
+# Зависимости
 node_modules/
+
+# Результаты тестов
 test-results/
 playwright-report/
+test-artifacts/
+
+# Скриншоты и видео
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp4
+*.webm
+screenshots/
+videos/
+
+# Логи
 *.log
+npm-debug.log*
+playwright.log
+
+# Системные файлы
 .DS_Store
+Thumbs.db
+
+# Секреты
 .env
 auth.json
+*.key
+*.pem
