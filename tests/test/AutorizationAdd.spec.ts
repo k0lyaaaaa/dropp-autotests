@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('Авторизация на dropp.market', async ({ page }) => {
-  test.setTimeout(60000);
+  test.setTimeout(5000);
   
     // Устанавливаем большой размер окна
   await page.setViewportSize({ width: 1440, height: 900 });
