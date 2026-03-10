@@ -7,7 +7,7 @@ test('Регистрация на dropp.market', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
 
   // Открываем сайт
-  await page.goto('https://dev.dropp.market/men');
+  await page.goto('https://dropp.market/men');
   console.log('✅ Сайт открыт');
 
   // Переходим на иконку профиля
