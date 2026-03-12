@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import dotenv from 'dotenv';
+dotenv.config();
 
 test('Регистрация на dropp.market', async ({ page }) => {
   test.setTimeout(60000);
@@ -40,12 +42,16 @@ test('Регистрация на dropp.market', async ({ page }) => {
 
   const emailField = page.locator('input[placeholder="Введите почту"]');
   await emailField.waitFor({ state: 'visible', timeout: 10000 });
-  await emailField.fill(`n.tolmachev+${randomNum}@dropp.market`);
+  const baseEmail = process.env.DROPP_EMAIL || '';
+  const emailForReg = baseEmail.includes('+')
+    ? baseEmail.replace(/\+[^@]+/, `+${randomNum}`)
+    : baseEmail.replace('@', `+${randomNum}@`);
+  await emailField.fill(emailForReg);
   console.log('✅ Email введён');
   
   // Вводим пароль
   const passwordInput = page.locator('input[type="password"]').first();
-  await passwordInput.fill('Kbpeymrf123@'); // ПАРОЛЬ
+  await passwordInput.fill(process.env.DROPP_PASSWORD || '');
   console.log('✅ Пароль введён');
 
   // Кликаем зарегистрироваться

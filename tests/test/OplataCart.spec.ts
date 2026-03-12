@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import dotenv from 'dotenv';
+dotenv.config();
 
 test('Оплата корзины на dropp.market', async ({ page }) => {
   test.setTimeout(60000);
@@ -23,12 +25,12 @@ test('Оплата корзины на dropp.market', async ({ page }) => {
   // Вводим логин
   const loginField = page.locator('input[name="login"]');
   await loginField.waitFor({ state: 'visible', timeout: 10000 });
-  await loginField.fill('n.tolmachev@dropp.market');
+  await loginField.fill(process.env.DROPP_EMAIL || '');
   console.log('✅ Логин введён');
   
   // Вводим пароль
   const passwordInput = page.locator('input[type="password"]').first();
-  await passwordInput.fill('Kbpeymrf123@');
+  await passwordInput.fill(process.env.DROPP_PASSWORD || '');
   console.log('✅ Пароль введён');
   
   // Нажимаем кнопку входа

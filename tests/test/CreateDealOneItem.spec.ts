@@ -1,4 +1,6 @@
 import { test, expect, Page } from '@playwright/test';
+import dotenv from 'dotenv';
+dotenv.config();
 
 test('Оплата корзины на dropp.market (1 товар)', async ({ page }) => {
   const startTime = Date.now();
@@ -24,12 +26,12 @@ test('Оплата корзины на dropp.market (1 товар)', async ({ pa
   // Вводим логин
   const loginField = page.locator('input[name="login"]');
   await loginField.waitFor({ state: 'visible', timeout: 10000 });
-  await loginField.fill('n.tolmachev+test2@dropp.market');
+  await loginField.fill(process.env.DROPP_EMAIL || '');
   console.log('✅ Логин введён');
   
   // Вводим пароль
   const passwordInput = page.locator('input[type="password"]').first();
-  await passwordInput.fill('Kbpeymrf123');
+  await passwordInput.fill(process.env.DROPP_PASSWORD || '');
   console.log('✅ Пароль введён');
   
   // Нажимаем кнопку входа
@@ -147,11 +149,11 @@ test('Оплата корзины на dropp.market (1 товар)', async ({ pa
   // Авторизация в админке
   const adminLogin = page.locator('input[name="email"]');
   await adminLogin.waitFor({ state: 'visible', timeout: 10000 });
-  await adminLogin.fill('dms@dropp.market');
+  await adminLogin.fill(process.env.DMS_EMAIL || '');
   console.log('✅ Логин админа введён');
 
   const adminPassword = page.locator('input[type="password"]').first();
-  await adminPassword.fill('7H24`tLl7P{x}');
+  await adminPassword.fill(process.env.DMS_PASSWORD || '');
   console.log('✅ Пароль админа введён');
 
   const adminLoginButton = page.locator('button[type="submit"]');

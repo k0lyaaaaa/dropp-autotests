@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import dotenv from 'dotenv';
+dotenv.config();
 
 test('Откырть 1 сделку в дмс', async ({ page }) => {
   test.setTimeout(60000);
@@ -25,12 +27,12 @@ test('Откырть 1 сделку в дмс', async ({ page }) => {
   // 5. Вводим email/телефон
   const loginField = page.locator('input[name="login"]');
   await loginField.waitFor({ state: 'visible', timeout: 10000 });
-  await loginField.fill('n.tolmachev+test2@dropp.market'); // ⚠️ ЗАМЕНИ!
+  await loginField.fill(process.env.DROPP_EMAIL || '');
   console.log('✅ Логин введён');
   
   // 6. Вводим пароль
   const passwordInput = page.locator('input[type="password"]').first();
-  await passwordInput.fill('Kbpeymrf123'); // ⚠️ ЗАМЕНИ НА СВОЙ ПАРОЛЬ
+  await passwordInput.fill(process.env.DROPP_PASSWORD || '');
   console.log('✅ Пароль введён');
   
   // 7. Нажимаем кнопку входа
@@ -72,12 +74,12 @@ if (savedOrderNumber) {
   // Ввод логина
   const loginField2 = page.locator('input[name="email"]');
   await loginField2.waitFor({ state: 'visible', timeout: 10000 });
-  await loginField2.fill('dms@dropp.market');
+  await loginField2.fill(process.env.DMS_EMAIL || '');
   console.log('✅ Логин введён');
 
   // Ввод пароля
   const passwordInput2 = page.locator('input[type="password"]').first();
-  await passwordInput2.fill('7H24`tLl7P{x}');
+  await passwordInput2.fill(process.env.DMS_PASSWORD || '');
   console.log('✅ Пароль введён');
 
   // Вход
