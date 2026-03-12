@@ -133,6 +133,81 @@ test('Откырть 1 сделку в дмс', async ({ page }) => {
         // Выбираем карту (индекс 4)
   await selectOption(page, 4, '**** **** **** 1111', 'Карта');
 
+for (let i = 1; i <= 1; i++) {
+    const itemId = `${savedOrderNumber}-0${i}`;
+    console.log(`\n========== ТОВАР ${itemId} ==========`);
+
+    console.log(`🔍 Ищем товар: ${itemId}`);
+
+    const itemElement01 = page
+      .locator(`.MuiDataGrid-cell:has-text("${itemId}") .css-1gtanqs`)
+      .first();
+    await itemElement01.waitFor({ state: "visible", timeout: 10000 });
+    const itemText01 = await itemElement01.textContent();
+    console.log(`🔍 Найден элемент с текстом: ${itemText01?.trim()}`);
+
+    await itemElement01.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    await itemElement01.click();
+    console.log(`✅ Кликнули по товару ${itemId}`);
+
+    // Вводим цену мерчанта
+    const amountEl01 = page.locator('input[name="amount"]').first();
+    await amountEl01.waitFor({ state: "visible", timeout: 10000 });
+    await amountEl01.fill("4213");
+    console.log("✅ Цена мерчанта введена");
+
+    // Вводим ссылку
+    const productLinkEl01 = page.locator('input[name="productLink"]').first();
+    await productLinkEl01.waitFor({ state: "visible", timeout: 10000 });
+    await productLinkEl01.fill("43куцв");
+    console.log("✅ Ссылка введена");
+
+    console.log("\n💾 Сохраняем изменения...");
+
+    const saveButton = page.locator('button:has-text("Сохранить")').first();
+    await saveButton.scrollIntoViewIfNeeded();
+    const isEnabled = await saveButton.isEnabled();
+    console.log(`📌 Кнопка доступна: ${isEnabled}`);
+    await saveButton.click();
+    await page.waitForTimeout(500);
+  }
+
+ // Вводим цену мерчанта
+    const merchantPrice = page.locator('input[name="merchantPrice"]').first();
+    await merchantPrice.waitFor({ state: "visible", timeout: 10000 });
+    await merchantPrice.fill("20");
+    console.log("✅ Цена доставки введена");
+
+    // Выбираем схему доставки (индекс 5)
+  await selectOption(page, 5, 'Globbing - Spain', 'Схема доставки');
+
+  // Вводим address line 2
+  const shipmentAddressLine2 = page.locator('input[name="shipmentAddressLine2"]');
+  await shipmentAddressLine2.waitFor({state: "visible", timeout: 10000 });
+  await shipmentAddressLine2.fill("Adrees street")
+  console.log("✅Адресс введен")
+
+   // Вводим номер заказа мерчанта  
+  const merchantOrderNumber = page.locator('input[name="merchantOrderNumber"]');
+  await merchantOrderNumber.waitFor({state: "visible", timeout: 10000 });
+  await merchantOrderNumber.fill(`12312 ${savedOrderNumber}`)
+  console.log("✅ Номер заказа мерчанта введен")
+
+    const SpenDeal = page.locator('button:has-text("Провести сделку")').first();
+    await SpenDeal.scrollIntoViewIfNeeded();
+    const isEnabled1 = await SpenDeal.isEnabled();
+    console.log(`📌 Кнопка доступна: ${isEnabled1}`);
+    await SpenDeal.click();
+    await page.waitForTimeout(500);
+
+    const ConfirmDeal = page.locator('button:has-text("Подтвердить")').first();
+    await ConfirmDeal.scrollIntoViewIfNeeded();
+    const isEnabled2 = await ConfirmDeal.isEnabled();
+    console.log(`📌 Кнопка доступна: ${isEnabled2}`);
+    await ConfirmDeal.click();
+    await page.waitForTimeout(500);
+
   // Ждём загрузки
   await page.waitForTimeout(5000);
 });
