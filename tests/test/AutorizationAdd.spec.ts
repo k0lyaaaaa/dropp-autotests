@@ -6,11 +6,11 @@ test('Авторизация на dropp.market', async ({ page }) => {
     // Устанавливаем большой размер окна
   await page.setViewportSize({ width: 1440, height: 900 });
 
-  // 2. Открываем сайт
-  await page.goto('https://dropp.market/men');
+  //  Открываем сайт
+  await page.goto('https://dev.dropp.market/men');
   console.log('✅ Сайт открыт');
   
-  // 3. Ищем и кликаем по иконке профиля/входа
+  //  Ищем и кликаем по иконке профиля/входа
   // Обычно это иконка человечка или кнопка "Войти"
   // КЛИКАЕМ ПО ИКОНКЕ ЧЕЛОВЕЧКА
   const userIcon = page.locator('div.HeaderMenu_customer__ymyVN').first();
@@ -18,27 +18,27 @@ test('Авторизация на dropp.market', async ({ page }) => {
   await userIcon.click();
   console.log('✅ Кликнули по иконке пользователя');
   
-  // 4. Ждём появления формы входа
+  //  Ждём появления формы входа
   await page.waitForSelector('input[type="email"], input[name="email"], input[name="login"]');
   console.log('✅ Форма авторизации загружена');
   
-  // 5. Вводим email/телефон
+  //  Вводим email/телефон
   const loginField = page.locator('input[name="login"]');
   await loginField.waitFor({ state: 'visible', timeout: 10000 });
   await loginField.fill('n.tolmachev@dropp.market'); // ⚠️ ЗАМЕНИ!
   console.log('✅ Логин введён');
   
-  // 6. Вводим пароль
+  //  Вводим пароль
   const passwordInput = page.locator('input[type="password"]').first();
   await passwordInput.fill('Kbpeymrf123@'); // ⚠️ ЗАМЕНИ НА СВОЙ ПАРОЛЬ
   console.log('✅ Пароль введён');
   
-  // 7. Нажимаем кнопку входа
+  //  Нажимаем кнопку входа
   const submitButton = page.locator('[data-test-id="popup-sign-in-button"]');
   await submitButton.click();
   console.log('✅ Нажали кнопку входа');
   
-  // 8. Ждём успешной авторизации (появление имени пользователя или уход с формы)
+  //  Ждём успешной авторизации (появление имени пользователя или уход с формы)
   await page.waitForTimeout(3000); // даём время на обработку
   
   const userIcon1 = page.locator('div.HeaderMenu_customer__ymyVN').first();
@@ -46,35 +46,35 @@ test('Авторизация на dropp.market', async ({ page }) => {
   await userIcon1.click();
   console.log('✅ Кликнули по иконке пользователя');
 
-  // 9. Проверяем, что авторизация прошла
+  //  Проверяем, что авторизация прошла
   
-await page.goto('https://dropp.market/men/catalog/sale');
+await page.goto('https://dev.dropp.market/men/catalog/sale');
   console.log('✅ Сайт открыт');
   
-  // 2. Ждём загрузки товаров
+  //  Ждём загрузки товаров
   await page.waitForSelector('.ProductCard_container__ZI_Qx', { timeout: 10000 });
   console.log('✅ Товары загрузились');
   
-  // 3. Находим все карточки товаров
+  //  Находим все карточки товаров
   const productCards = page.locator('.ProductCard_container__ZI_Qx');
   const count = await productCards.count();
   console.log(`✅ Найдено товаров: ${count}`);
   
-  // 4. Выбираем случайный товар
+  //  Выбираем случайный товар
   const randomIndex = Math.floor(Math.random() * count);
   console.log(`✅ Выбран товар #${randomIndex + 1}`);
   
-  // 5. Сохраняем название товара
+  //  Сохраняем название товара
   const productName = await productCards.nth(randomIndex)
     .locator('.ProductCard_name__LLWJY')
     .textContent();
   console.log(`🛍️ Товар: ${productName?.trim() || 'Без названия'}`);
   
-  // 6. Кликаем по карточке товара
+  //  Кликаем по карточке товара
   await productCards.nth(randomIndex).click();
   console.log('✅ Перешли на страницу товара');
   
-  // 7. Ждём появления КОНКРЕТНОГО элемента на странице товара
+  //  Ждём появления КОНКРЕТНОГО элемента на странице товара
   console.log('⏳ Ждём загрузки страницы товара...');
   
   // Ждём любой из этих элементов:
@@ -92,7 +92,7 @@ await page.goto('https://dropp.market/men/catalog/sale');
     await page.screenshot({ path: 'product-page-timeout.png' });
   }
   
-  // 8. Ищем кнопку добавления в корзину
+  //  Ищем кнопку добавления в корзину
   console.log('🔍 Ищем кнопку добавления...');
   
   // Попробуем разные селекторы
