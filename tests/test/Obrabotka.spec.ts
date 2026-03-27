@@ -154,7 +154,7 @@ test("Копировать item ID заказа на dropp.market", async ({ pag
     return true;
   }
 
-  for (let i = 1; i <= 2; i++) {
+ for (let i = 1; i <= 2; i++) {
     const itemId = `${savedOrderNumber}-0${i}`;
     console.log(`\n========== ТОВАР ${itemId} ==========`);
 

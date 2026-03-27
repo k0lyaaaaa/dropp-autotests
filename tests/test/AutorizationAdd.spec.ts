@@ -1,53 +1,13 @@
 import { test, expect } from '@playwright/test';
 import dotenv from 'dotenv';
+import { createUser } from './Registration';
 dotenv.config();
 
 test('Авторизация на dropp.market', async ({ page }) => {
   test.setTimeout(60000);
   
     // Устанавливаем большой размер окна
-  await page.setViewportSize({ width: 1440, height: 900 });
-
-  //  Открываем сайт
-  await page.goto('https://dev.dropp.market/men');
-  console.log('✅ Сайт открыт');
-  
-  //  Ищем и кликаем по иконке профиля/входа
-  // Обычно это иконка человечка или кнопка "Войти"
-  // КЛИКАЕМ ПО ИКОНКЕ ЧЕЛОВЕЧКА
-  const userIcon = page.locator('div.HeaderMenu_customer__ymyVN').first();
-  await userIcon.waitFor({ state: 'visible', timeout: 10000 });
-  await userIcon.click();
-  console.log('✅ Кликнули по иконке пользователя');
-  
-  //  Ждём появления формы входа
-  await page.waitForSelector('input[type="email"], input[name="email"], input[name="login"]');
-  console.log('✅ Форма авторизации загружена');
-  
-  //  Вводим email/телефон
-  const loginField = page.locator('input[name="login"]');
-  await loginField.waitFor({ state: 'visible', timeout: 10000 });
-  await loginField.fill(process.env.DROPP_EMAIL || '');
-  console.log('✅ Логин введён');
-  
-  //  Вводим пароль
-  const passwordInput = page.locator('input[type="password"]').first();
-  await passwordInput.fill(process.env.DROPP_PASSWORD || '');
-  console.log('✅ Пароль введён');
-  
-  //  Нажимаем кнопку входа
-  const submitButton = page.locator('[data-test-id="popup-sign-in-button"]');
-  await submitButton.click();
-  console.log('✅ Нажали кнопку входа');
-  
-  //  Ждём успешной авторизации (появление имени пользователя или уход с формы)
-  await page.waitForTimeout(3000); // даём время на обработку
-  
-  const userIcon1 = page.locator('div.HeaderMenu_customer__ymyVN').first();
-  await userIcon1.waitFor({ state: 'visible', timeout: 10000 });
-  await userIcon1.click();
-  console.log('✅ Кликнули по иконке пользователя');
-
+await createUser(page);
   //  Проверяем, что авторизация прошла
   
 await page.goto('https://dev.dropp.market/men/catalog/sale');

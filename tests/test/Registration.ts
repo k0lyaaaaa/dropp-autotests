@@ -1,17 +1,12 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import dotenv from 'dotenv';
 dotenv.config();
 
-test('Регистрация на dropp.market', async ({ page }) => {
-  test.setTimeout(60000);
-
-    // Устанавливаем большой размер окна
-  await page.setViewportSize({ width: 1440, height: 900 });
-
-  // Открываем сайт
-  await page.goto('https://dropp.market/men');
-  console.log('✅ Сайт открыт');
-
+  export async function createUser(page: Page) { 
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto('https://dev.dropp.market/men');
+  console.log('✅ Сайт открыт (авторизация)');
+  
   // Переходим на иконку профиля
     const userIcon = page.locator('div.HeaderMenu_customer__ymyVN').first();
   await userIcon.waitFor({ state: 'visible', timeout: 10000 });
@@ -60,4 +55,4 @@ test('Регистрация на dropp.market', async ({ page }) => {
   console.log('✅ Нажали кнопку зарегистрироваться');
   
     await page.waitForTimeout(5000)
-});
+};
