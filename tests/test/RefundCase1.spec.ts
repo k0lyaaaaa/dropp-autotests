@@ -1,9 +1,6 @@
 import { test, Page, Locator, expect } from "@playwright/test";
-import dotenv from "dotenv";
-import { AuthDMSFin } from "./AuthDMSFin";
-import { loginAsUser } from "./auth";
-import { SaveLastOrder, savedOrderNumber } from "./saveLastOrder";
-dotenv.config();
+import { AuthDMSFin, loginAsUser } from "../helpers/auth";
+import { SaveLastOrder, savedOrderNumber } from "../helpers/saveLastOrder";
 
 const openReturnsSection = async (page: Page) => {
   // Ждём появления любой из двух кнопок
@@ -241,7 +238,7 @@ test("Создание возврата по последнему купленн
       .first();
     await confirmRefund.click();
     console.log("✅ Подтверждаем возврат ДС");
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000);
 
     itemsProcessed++;
     if (optionIdx >= optionsCount - 1) {
