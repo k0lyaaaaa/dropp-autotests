@@ -75,20 +75,41 @@ export const createOrderWithMultipleItems = async (
     throw new Error("❌ Ошибка авторизации");
   }
   console.log("✅ Авторизован");
-  const limit = 100;
+  const limit = 50;
   let offset = 0;
   let totalAmount = 0;
+  let successfullyAdded = 0;
 
   const orderItems: OrderItem[] = [];
-  const toAdd: { variant_id: string; quantity: number }[] = [];
+
+  // 2. Создаём корзину
+  console.log("📦 Создаём корзину...");
+  const createCartResponse = await request.post(
+    "https://dev.dropp.market/medusa/store/carts"
+  );
+  const cartData = await createCartResponse.json();
+  const cart = cartData.cart || cartData;
+  console.log(`🛒 Корзина: ${cart.id}`);
+
+  // 3. Добавляем адрес доставки
+  console.log("📦 Добавляем адрес доставки...");
+  await request.post(`https://dev.dropp.market/medusa/store/carts/${cart.id}`, {
+    data: {
+      shipping_address: shippingAddress,
+    },
+  });
+  console.log("✅ Адрес добавлен");
+
   console.log(`🔍 Ищем подходящие товары (нужно найти ${itemsCount})...`);
-  while (orderItems.length < itemsCount) {
-    // 2. Получаем все товары
+  while (successfullyAdded < itemsCount) {
+    const toAdd: { variant_id: string; quantity: number; title: string; price: number }[] = [];
+
+    // 4. Получаем все товары
     console.log("📦 Загружаем каталог...");
     const productsResponse = await request.get(
       "https://dev.dropp.market/medusa/store/products",
       {
-        params: { limit },
+        params: { limit, offset },
       }
     );
     const data = await productsResponse.json();
@@ -100,78 +121,59 @@ export const createOrderWithMultipleItems = async (
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
+    const potentialItemsCount = 10;
     for (const item of shuffled) {
-      if (orderItems.length >= itemsCount) break;
+      if (toAdd.length >= potentialItemsCount) break;
 
       for (const variant of item.variants) {
-        if (orderItems.length >= itemsCount) break;
+        if (toAdd.length >= potentialItemsCount) break;
         const price = getVariantPrice(variant);
         const canProcess =
           isVariantAvailable(variant) && price > 0 && price <= 35000;
         if (!canProcess) continue;
-        orderItems.push({
-          title: item.title,
-          price: price,
-          variant_id: variant.id,
-        });
         toAdd.push({
           variant_id: variant.id,
           quantity: 1,
+          title: item.title,
+          price,
         });
-        console.log(
-          `   ✅ Добавлен в объект для дальшейшего добавления в корзину`
-        );
-        totalAmount += price;
+        console.log(`   🔎 Кандидат найден: ${item.title}`);
       }
     }
+    // 5. Добавляем товары в корзину
+    console.log(`📦 Добавляем ${toAdd.length} кандидатов в корзину...`);
+    for await (const item of toAdd) {
+      if (successfullyAdded >= itemsCount) break;
+      const addItemResponse = await request.post(
+        `https://dev.dropp.market/medusa/store/carts/${cart.id}/line-items`,
+        {
+          data: { variant_id: item.variant_id, quantity: item.quantity },
+        }
+      );
+      if (addItemResponse.status() !== 200) {
+        console.log(`   ❌ Ошибка добавления: ${item.title}`);
+        continue;
+      }
+      orderItems.push({ title: item.title, price: item.price, variant_id: item.variant_id });
+      totalAmount += item.price;
+      successfullyAdded++;
+      console.log(`   ✅ Добавлен в корзину (${successfullyAdded}/${itemsCount}): ${item.title}`);
+      await sleep(300);
+    }
+    if (successfullyAdded >= itemsCount) break;
     offset += limit;
   }
   console.log(`💰 Общая сумма: ${totalAmount} ₽`);
-  if (orderItems.length === 0) {
+  if (successfullyAdded === 0) {
     throw new Error("❌ Не удалось добавить ни одного товара");
   }
 
-  if (orderItems.length < itemsCount) {
+  if (successfullyAdded < itemsCount) {
     console.log(
-      `⚠️ Найдено только ${orderItems.length} из ${itemsCount} товаров`
+      `⚠️ Удалось добавить только ${successfullyAdded} из ${itemsCount} товаров`
     );
   } else {
-    console.log(`✅ Успешно добавлено ${orderItems.length} товаров`);
-  }
-
-  // 3. Создаём корзину
-  console.log("📦 Создаём корзину...");
-  const createCartResponse = await request.post(
-    "https://dev.dropp.market/medusa/store/carts"
-  );
-  const cartData = await createCartResponse.json();
-  const cart = cartData.cart || cartData;
-  console.log(`🛒 Корзина: ${cart.id}`);
-
-  // 4. Добавляем адрес доставки
-  console.log("📦 Добавляем адрес доставки...");
-  await request.post(`https://dev.dropp.market/medusa/store/carts/${cart.id}`, {
-    data: {
-      shipping_address: shippingAddress,
-    },
-  });
-  console.log("✅ Адрес добавлен");
-
-  // 5. Добавляем товары в корзину
-  console.log(`📦 Добавляем ${toAdd.length} товаров в корзину...`);
-  for await (const item of toAdd) {
-    const addItemResponse = await request.post(
-      `https://dev.dropp.market/medusa/store/carts/${cart.id}/line-items`,
-      {
-        data: item,
-      }
-    );
-    console.log(`   ✅ Добавлен в корзину`);
-    if (addItemResponse.status() !== 200) {
-      console.log(`   ❌ Ошибка добавления`);
-      continue;
-    }
-    await sleep(200);
+    console.log(`✅ Успешно добавлено ${successfullyAdded} товаров`);
   }
 
   // 6. Получаем актуальную сумму
