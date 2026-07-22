@@ -125,5 +125,7 @@ await page.waitForTimeout(2000);
   const status = page.locator('span:has-text("Проведен")').first();
   await status.waitFor({ state: 'visible', timeout: 10000 });
   console.log('✅ Статус "Проведен"');
-
+  console.log(`Тест проверяет по следующим пунктам:
+  20. Товар удаляется в заявке на возврат
+  21. По причине "Не подошло" + другая причина не списывается 2500`);
 });

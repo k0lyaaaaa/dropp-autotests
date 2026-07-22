@@ -1,0 +1,82 @@
+✅ Авторизован
+📦 Загружаем каталог...
+📦 Загружено товаров: 999
+📦 Создаём корзину...
+🛒 Корзина: cart_01KW9ZXVZZJJXTHSYGSTBRRJDE
+📦 Добавляем адрес доставки...
+✅ Адрес добавлен
+🔍 Ищем подходящие товары (нужно 14)...
+🛍️ Товар 1: Fits Everybody Bandeau Ochre — 2358 ₽ (вариантов: 5)
+   ✅ Добавлен
+🛍️ Товар 2: Bea ribbed-knit top — 31227 ₽ (вариантов: 3)
+   ❌ Ошибка добавления
+🛍️ Товар 2: Pentola trousers — 29859 ₽ (вариантов: 4)
+   ✅ Добавлен
+🛍️ Товар 3: 18kt gold-plated sterling silver Schoenhauser earring — 13591 ₽ (вариантов: 1)
+   ✅ Добавлен
+🛍️ Товар 4: Slim Happy Tiger T-Shirt — 26762 ₽ (вариантов: 5)
+   ✅ Добавлен
+🛍️ Товар 5: RWS Knitted Vest — 33189 ₽ (вариантов: 1)
+   ❌ Ошибка добавления
+🛍️ Товар 5: Happy Tiger Sweatshirt — 29210 ₽ (вариантов: 4)
+   ❌ Ошибка добавления
+🛍️ Товар 5: Scarf sleeveless top — 20515 ₽ (вариантов: 9)
+   ✅ Добавлен
+🛍️ Товар 6: Boke Flower Cotton T-Shirt — 17275 ₽ (вариантов: 3)
+   ✅ Добавлен
+🛍️ Товар 7: Franco Patchwork Sweater — 27791 ₽ (вариантов: 2)
+   ✅ Добавлен
+🛍️ Товар 8: Black Leather Logo Sneakers — 29414 ₽ (вариантов: 1)
+   ✅ Добавлен
+🛍️ Товар 9: Tiger Intarsia Knitted Sweater — 32169 ₽ (вариантов: 1)
+   ✅ Добавлен
+🛍️ Товар 10: 18kt gold-plated sterling silver Schlesi earring — 14106 ₽ (вариантов: 1)
+   ✅ Добавлен
+🛍️ Товар 11: Navy Blue Chequered Wool Blend Shirt — 21253 ₽ (вариантов: 2)
+   ❌ Ошибка добавления
+🛍️ Товар 11: Converse X Kenzo Cotton Crewneck Sweatshirt — 26660 ₽ (вариантов: 3)
+   ✅ Добавлен
+🛍️ Товар 12: 35mm logo-print flatform espadrilles — 20387 ₽ (вариантов: 2)
+   ✅ Добавлен
+🛍️ Товар 13: Logo-patch suede espadrilles  — 11318 ₽ (вариантов: 1)
+   ✅ Добавлен
+🛍️ Товар 14: Striped socks — 6075 ₽ (вариантов: 3)
+   ❌ Ошибка добавления
+🛍️ Товар 14: Swipe leather mini bag — 30974 ₽ (вариантов: 2)
+   ❌ Ошибка добавления
+🛍️ Товар 14: Oversized Kenzo Happy Tiger T-Shirt — 22682 ₽ (вариантов: 4)
+   ✅ Добавлен
+✅ Успешно добавлено 14 товаров
+💰 Общая сумма: 294887 ₽
+💰 Итоговая сумма: 2948 ₽
+📦 Оформляем заказ...
+✅ Заказ создан: ARBC-ARBF-609502
+🆔 ID заказа: order_01KW9ZY1V0R8EQSBCQK35DP5ZW
+📦 Количество товаров в заказе: 14
+💳 Оплачиваем заказ...
+💳 Оплата: 200
+
+🎉 ЗАКАЗ ОФОРМЛЕН И ОПЛАЧЕН!
+📦 Номер: ARBC-ARBF-609502
+💰 Сумма: 2948 ₽
+🛍️ Товары:
+   1. Fits Everybody Bandeau Ochre — 2358 ₽
+   2. Pentola trousers — 29859 ₽
+   3. 18kt gold-plated sterling silver Schoenhauser earring — 13591 ₽
+   4. Slim Happy Tiger T-Shirt — 26762 ₽
+   5. Scarf sleeveless top — 20515 ₽
+   6. Boke Flower Cotton T-Shirt — 17275 ₽
+   7. Franco Patchwork Sweater — 27791 ₽
+   8. Black Leather Logo Sneakers — 29414 ₽
+   9. Tiger Intarsia Knitted Sweater — 32169 ₽
+   10. 18kt gold-plated sterling silver Schlesi earring — 14106 ₽
+   11. Converse X Kenzo Cotton Crewneck Sweatshirt — 26660 ₽
+   12. 35mm logo-print flatform espadrilles — 20387 ₽
+   13. Logo-patch suede espadrilles  — 11318 ₽
+   14. Oversized Kenzo Happy Tiger T-Shirt — 22682 ₽
+✅ Сайт открыт (авторизация)
+✅ Кликнули по иконке пользователя
+✅ Форма авторизации загружена
+✅ Логин введён
+✅ Пароль введён
+✅ Нажали кнопку входа

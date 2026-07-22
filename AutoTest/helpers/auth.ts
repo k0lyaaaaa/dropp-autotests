@@ -4,11 +4,11 @@ import { Page } from '@playwright/test';
 
 export async function loginAsUser(page: Page) {
   await page.setViewportSize({ width: 1600, height: 1000 });
-  await page.goto('https://dev.dropp.market/men');
+  await page.goto('https://stage.dropp.market/men');
   console.log('✅ Сайт открыт (авторизация)');
 
-  const userIcon = page.locator('div.HeaderMenu_customer__ymyVN').first();
-  await userIcon.waitFor({ state: 'visible', timeout: 10000 });
+  const userIcon = page.locator('svg path[d*="M7.59665 9.75027"]').first();
+  await userIcon.waitFor({ state: 'visible', timeout: 20000 });
   await userIcon.click();
   console.log('✅ Кликнули по иконке пользователя');
 
@@ -53,7 +53,7 @@ const DMS_CREDENTIALS: Record<DmsRole, { email: string; password: string }> = {
 export async function loginDms(page: Page, role: DmsRole = 'admin') {
   const { email, password } = DMS_CREDENTIALS[role];
   await page.setViewportSize({ width: 1600, height: 1000 });
-  await page.goto('https://dev-dms.dropp.market/orders');
+  await page.goto('https://stage-dms.dropp.market/orders');
   console.log('✅ Сайт админки открыт');
 
   const adminLogin = page.locator('input[name="email"]');

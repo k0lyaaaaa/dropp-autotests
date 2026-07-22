@@ -4,8 +4,7 @@
   "description": "",
   "main": "hello.js",
   "scripts": {
-    "test": "jest",
-    "start": "npx playwright test --project=chromium --headed"
+    "start": "node runner.js"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +12,7 @@
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@types/node": "^25.4.0",
+    "allure-playwright": "^3.7.1",
     "jest": "^30.3.0"
   },
   "dependencies": {

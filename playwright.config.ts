@@ -8,7 +8,7 @@ dotenv.config();
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './tests',
+  testDir: './AutoTest',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -18,12 +18,15 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [ ['allure-playwright'],  
+  ['list'],
+],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     // Базовый URL — теперь в тестах можно писать page.goto('/men') вместо полного URL
-    baseURL: 'https://dev.dropp.market',
+    baseURL: 'https://stage.dropp.market',
     trace: 'on-first-retry',
+   
   },
 
   /* Configure projects for major browsers */

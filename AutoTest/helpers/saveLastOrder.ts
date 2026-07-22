@@ -6,7 +6,7 @@ export let savedOrderNumber: string = '';
 
 export async function SaveLastOrder(page: Page) {
   // Открываем меню пользователя и переходим в заказы
-  const userMenu = page.locator('div.HeaderMenu_customer__ymyVN').first();
+  const userMenu = page.locator('svg path[d*="M7.59665 9.75027"]').first();
   await userMenu.waitFor({ state: 'visible', timeout: 10000 });
   await userMenu.click();
   console.log('✅ Кликнули по иконке пользователя');
