@@ -4,13 +4,18 @@ import { Page } from '@playwright/test';
 
 export async function loginAsUser(page: Page) {
   await page.setViewportSize({ width: 1600, height: 1000 });
-  await page.goto('https://stage.dropp.market/men');
+  await page.goto('https://dev.dropp.market/men');
   console.log('✅ Сайт открыт (авторизация)');
 
   const userIcon = page.locator('svg path[d*="M7.59665 9.75027"]').first();
   await userIcon.waitFor({ state: 'visible', timeout: 20000 });
   await userIcon.click();
   console.log('✅ Кликнули по иконке пользователя');
+
+  const clickVhod = page.locator('button:has-text("Войти через E-mail")');
+  await clickVhod.waitFor({ state: 'visible', timeout: 10000 });
+  await clickVhod.click();
+  console.log('✅ Нажали кнопку "Войти через E-mail"');
 
   await page.waitForSelector('input[type="email"], input[name="email"], input[name="login"]');
   console.log('✅ Форма авторизации загружена');
@@ -53,7 +58,7 @@ const DMS_CREDENTIALS: Record<DmsRole, { email: string; password: string }> = {
 export async function loginDms(page: Page, role: DmsRole = 'admin') {
   const { email, password } = DMS_CREDENTIALS[role];
   await page.setViewportSize({ width: 1600, height: 1000 });
-  await page.goto('https://stage-dms.dropp.market/orders');
+  await page.goto('https://dev-dms.dropp.market/orders');
   console.log('✅ Сайт админки открыт');
 
   const adminLogin = page.locator('input[name="email"]');
@@ -74,3 +79,4 @@ export async function loginDms(page: Page, role: DmsRole = 'admin') {
 
 // Обратная совместимость — старые имена функций продолжают работать
 export const AuthDMSFin = (page: Page) => loginDms(page, 'fin-manager');
+export const AuthDMSAdmin = (page: Page) => loginDms(page, 'admin'); 

@@ -24,7 +24,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     // Базовый URL — теперь в тестах можно писать page.goto('/men') вместо полного URL
-    baseURL: 'https://stage.dropp.market',
+    baseURL: 'https://dev.dropp.market',
     trace: 'on-first-retry',
    
   },

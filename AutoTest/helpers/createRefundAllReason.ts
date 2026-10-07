@@ -1,5 +1,14 @@
 import { Page, Locator } from '@playwright/test';
+import { getRefundReasonOptions, getRefundReasonSelects } from './refundReasons';
+import { getConfirmButton } from './confirmationButtons';
 import { expect } from '@playwright/test';
+import {
+  getRefundItemCheckboxes,
+  getRefundItemsTable,
+  isRefundItemChecked,
+} from './refundItems';
+import { openRecentlyOpenedDmsOrder } from './dmsOrders';
+import { getFixedReturnLogisticsCost } from './refundValidation';
 
 export const openReturnsSection = async (page: Page) => {
   await page.waitForSelector(
@@ -22,81 +31,29 @@ export const openReturnsSection = async (page: Page) => {
 };
 
 export const isMuiChecked = async (cb: Locator) =>
-  await cb.evaluate(
-    (el) =>
-      el.closest(".MuiCheckbox-root")?.classList.contains("Mui-checked") ??
-      false
-  );
+  isRefundItemChecked(cb);
 
 export const createRefunds = async (page: Page, savedOrderNumber: string) => {
   await openReturnsSection(page);
 
-  const refundContainer = page
-    .locator('div[legend="Вернуть ДС потоварно"]')
-    .first();
+  const refundContainer = getRefundItemsTable(page);
   await refundContainer.waitFor({ state: "visible", timeout: 10000 });
-
-  const tableScroller = refundContainer
-    .locator(".MuiDataGrid-virtualScroller")
-    .first();
-  await tableScroller.waitFor({ state: "visible", timeout: 10000 });
-
-  const getScrollInfo = () =>
-    tableScroller.evaluate((el) => ({
-      scrollTop: el.scrollTop,
-      clientHeight: el.clientHeight,
-      scrollHeight: el.scrollHeight,
-    }));
 
   let itemsProcessed = 0;
   let optionIdx = 0;
   const reasonsUsed: string[] = [];
 
   while (true) {
-    await tableScroller.evaluate((el) => {
-      el.scrollTop = 0;
-    });
-    await page.waitForTimeout(500);
-
-    const { clientHeight, scrollHeight } = await getScrollInfo();
-    const needsScroll = scrollHeight > clientHeight;
-    const scrollStep = Math.floor(clientHeight / 2);
-
     let found = false;
 
-    outerLoop: while (true) {
-      const visibleCheckboxes = await refundContainer
-        .locator('input[name="select_row"]')
-        .all();
-
-      for (const checkbox of visibleCheckboxes) {
-        const isDisabled = await checkbox.isDisabled();
-        const isAlreadyChecked = await isMuiChecked(checkbox);
-
-        if (!isDisabled && !isAlreadyChecked) {
-          await checkbox.click({ force: true });
-          await page.waitForTimeout(500);
-
-          const selectedRows = await refundContainer
-            .locator(".MuiDataGrid-row.Mui-selected")
-            .count();
-
-          if (selectedRows === 1) {
-            found = true;
-            break outerLoop;
-          }
-        }
+    const checkboxes = await getRefundItemCheckboxes(refundContainer).all();
+    for (const checkbox of checkboxes) {
+      if (!(await checkbox.isDisabled()) && !(await isRefundItemChecked(checkbox))) {
+        await checkbox.click();
+        await expect(checkbox).toHaveAttribute('aria-checked', 'true');
+        found = true;
+        break;
       }
-
-      if (!needsScroll) break;
-
-      const { scrollTop, scrollHeight: sh } = await getScrollInfo();
-      if (scrollTop + clientHeight >= sh) break;
-
-      await tableScroller.evaluate((el, step) => {
-        el.scrollTop += step;
-      }, scrollStep);
-      await page.waitForTimeout(500);
     }
 
     if (!found) {
@@ -109,12 +66,12 @@ export const createRefunds = async (page: Page, savedOrderNumber: string) => {
     await fillButton.click();
     await page.waitForTimeout(2000);
 
-    const reasonSelect = page.locator(".MuiSelect-select.css-ljcffu").first();
+    const reasonSelect = getRefundReasonSelects(page).first();
     await reasonSelect.scrollIntoViewIfNeeded();
     await reasonSelect.click();
 
-    await page.waitForSelector('li[role="option"]', { timeout: 5000 });
-    const options = page.locator('li[role="option"]');
+    const options = getRefundReasonOptions(page);
+    await options.first().waitFor({ state: 'visible', timeout: 5000 });
     const optionsCount = await options.count();
     const option = options.nth(optionIdx);
     const reasonText = await option.textContent();
@@ -135,11 +92,7 @@ export const createRefunds = async (page: Page, savedOrderNumber: string) => {
     await page.waitForTimeout(1000);
 
     if (reasonText.trim() === "Не подошло") {
-      const fixedLogisticsCostValue = page
-        .locator(
-          'p:has-text("Фиксированная стоимость обратной логистики") + div p'
-        )
-        .first();
+      const fixedLogisticsCostValue = getFixedReturnLogisticsCost(page);
       await fixedLogisticsCostValue.waitFor({
         state: "visible",
         timeout: 10000,
@@ -160,9 +113,7 @@ export const createRefunds = async (page: Page, savedOrderNumber: string) => {
     await refundButton.click();
     await page.waitForTimeout(1000);
 
-    const confirmRefund = page
-      .locator('button:has-text("Подтвердить")')
-      .first();
+    const confirmRefund = getConfirmButton(page);
     await confirmRefund.click();
     await page.waitForTimeout(5000);
 
@@ -173,16 +124,10 @@ export const createRefunds = async (page: Page, savedOrderNumber: string) => {
       optionIdx++;
     }
 
-    const linkedOrderLink = page
-      .locator('a[href*="sidepage=order"][href*="sidepageEntityId"]')
-      .first();
-    await linkedOrderLink.waitFor({ state: "visible", timeout: 10000 });
-    await linkedOrderLink.scrollIntoViewIfNeeded();
-    await linkedOrderLink.click();
+    await openRecentlyOpenedDmsOrder(page, savedOrderNumber);
 
     await openReturnsSection(page);
     await refundContainer.waitFor({ state: "visible", timeout: 10000 });
-    await tableScroller.waitFor({ state: "visible", timeout: 10000 });
   }
 
   if (itemsProcessed === 0) {

@@ -1,5 +1,13 @@
 import { Page, Locator, expect } from '@playwright/test';
-import { isMuiChecked, openReturnsSection } from './createRefundAllReason';
+import { openReturnsSection } from './createRefundAllReason';
+import { openRecentlyOpenedDmsOrder } from './dmsOrders';
+import { getRefundReasonOption, getRefundReasonSelects } from './refundReasons';
+import { getDestructiveConfirmButton } from './confirmationButtons';
+import {
+  getRefundItemCheckboxes,
+  getRefundItemsTable,
+  isRefundItemChecked,
+} from './refundItems';
 
 // ==================== ТИПЫ ====================
 
@@ -9,11 +17,11 @@ export type AfterSendExpect = 'decline-visible' | 'manager-confirm-visible';
 
 export async function selectReturnReason(page: Page, reasonText: string) {
   console.log(`🔍 Выбираем причину возврата: ${reasonText}`);
-  const reasonSelect = page.locator('.MuiSelect-select.css-ljcffu').first();
+  const reasonSelect = getRefundReasonSelects(page).first();
   await reasonSelect.scrollIntoViewIfNeeded();
   await reasonSelect.click();
-  await page.waitForSelector('li[role="option"]', { timeout: 5000 });
-  const option = page.locator(`li[role="option"]:has-text("${reasonText}")`).first();
+  const option = getRefundReasonOption(page, reasonText);
+  await option.waitFor({ state: 'visible', timeout: 5000 });
   await option.click();
   console.log(`✅ Выбрана причина: ${reasonText}`);
   await expect(option).not.toBeVisible({ timeout: 5000 });
@@ -24,57 +32,21 @@ export async function selectReturnReason(page: Page, reasonText: string) {
 export async function selectFirstAvailableRow(
   page: Page,
   refundContainer: Locator,
-  tableScroller: Locator,
+  _tableScroller: Locator,
   iteration: number
 ) {
   console.log(`\n🔄 Итерация ${iteration}: ищем активный товар...`);
-  const getScrollInfo = () =>
-    tableScroller.evaluate((el) => ({
-      scrollTop: el.scrollTop,
-      clientHeight: el.clientHeight,
-      scrollHeight: el.scrollHeight,
-    }));
-
   let selected = false;
-  await tableScroller.evaluate((el) => { el.scrollTop = 0; });
-  await page.waitForTimeout(300);
 
-  const { clientHeight, scrollHeight } = await getScrollInfo();
-  const needsScroll = scrollHeight > clientHeight;
-  const scrollStep = Math.floor(clientHeight / 2);
-
-  outerLoop: while (true) {
-    const visibleCheckboxes = await refundContainer
-      .locator('input[name="select_row"]')
-      .all();
-
-    for (const checkbox of visibleCheckboxes) {
-      const isDisabled = await checkbox.isDisabled();
-      const isAlreadyChecked = await isMuiChecked(checkbox);
-
-      if (!isDisabled && !isAlreadyChecked) {
-        await checkbox.click({ force: true });
-        await page.waitForTimeout(300);
-
-        const selectedRows = await refundContainer
-          .locator('.MuiDataGrid-row.Mui-selected')
-          .count();
-
-        if (selectedRows === 1) {
-          selected = true;
-          console.log(`✅ Товар выбран`);
-          break outerLoop;
-        }
-      }
+  const checkboxes = await getRefundItemCheckboxes(refundContainer).all();
+  for (const checkbox of checkboxes) {
+    if (!(await checkbox.isDisabled()) && !(await isRefundItemChecked(checkbox))) {
+      await checkbox.click();
+      await expect(checkbox).toHaveAttribute('aria-checked', 'true');
+      selected = true;
+      console.log(`✅ Товар выбран`);
+      break;
     }
-
-    if (!needsScroll) break;
-
-    const { scrollTop, scrollHeight: sh } = await getScrollInfo();
-    if (scrollTop + clientHeight >= sh) break;
-
-    await tableScroller.evaluate((el, step) => { el.scrollTop += step; }, scrollStep);
-    await page.waitForTimeout(300);
   }
 
   if (!selected) {
@@ -103,21 +75,7 @@ export async function openRefundForm(
 // ==================== МОДАЛКА ПОДТВЕРЖДЕНИЯ ОТКЛОНЕНИЯ ====================
 
 export function confirmButtonInDeclineModal(page: Page): Locator {
-  const inModal = page
-    .locator('.MuiModal-root')
-    .filter({ has: page.locator('button:has-text("Подтвердить")') })
-    .last()
-    .locator('button:has-text("Подтвердить")')
-    .first();
-
-  const inDialog = page
-    .locator('.MuiDialog-root')
-    .filter({ has: page.locator('button:has-text("Подтвердить")') })
-    .last()
-    .locator('button:has-text("Подтвердить")')
-    .first();
-
-  return inModal.or(inDialog);
+  return getDestructiveConfirmButton(page);
 }
 
 // ==================== СОЗДАНИЕ И ОТПРАВКА ЗАЯВКИ ====================
@@ -160,13 +118,13 @@ export async function reopenOrderAndReturnsSection(
   page: Page,
   orderNumber: string
 ): Promise<{ refundContainer: Locator; tableScroller: Locator }> {
-  await page.locator(`a:has-text("Заказ ${orderNumber}")`).first().click();
+  await openRecentlyOpenedDmsOrder(page, orderNumber);
   console.log(`✅ Открыт заказ ${orderNumber}`);
   await page.waitForTimeout(2000);
   await openReturnsSection(page);
 
-  const refundContainer = page.locator('div[legend="Вернуть ДС потоварно"]').first();
-  const tableScroller = refundContainer.locator('.MuiDataGrid-virtualScroller').first();
+  const refundContainer = getRefundItemsTable(page);
+  const tableScroller = refundContainer;
   await refundContainer.waitFor({ state: 'visible', timeout: 10000 });
   await tableScroller.waitFor({ state: 'visible', timeout: 10000 });
   return { refundContainer, tableScroller };
@@ -205,6 +163,9 @@ export async function testDeleteRefund(
   const deleteButton = page.locator('button:has-text("Удалить заявку")').first();
   await expect(deleteButton).toBeVisible({ timeout: 10000 });
   await deleteButton.click();
+  const confirmDelete = getDestructiveConfirmButton(page);
+  await expect(confirmDelete).toBeVisible({ timeout: 10000 });
+  await confirmDelete.click();
   console.log('❌ Заявка удалена');
 
   await expect(deleteButton).not.toBeVisible({ timeout: 5000 });
@@ -233,7 +194,7 @@ export async function testCreateSendAndDecline(
   await commentField.fill('Отредактированный тестовый комментарий для возврата');
   console.log('✅ Заметка изменена');
 
-  await selectReturnReason(page, 'Другое');
+  await selectReturnReason(page, 'Отсутствует в наличии');
 
   const saveButton = page.locator('button:has-text("Сохранить изменения")').first();
   await expect(saveButton).toBeVisible({ timeout: 10000 });

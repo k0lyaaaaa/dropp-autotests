@@ -9,6 +9,8 @@ interface OrderItem {
 
 interface OrderResult {
   orderNumber: string;
+  /** Полный `display_id` заказа, как его показывает DMS (`ARBH-123456`). */
+  displayId: string;
   orderId: string;
   totalAmount: number;
   itemsCount: number;
@@ -45,7 +47,7 @@ export const createOrderWithMultipleItems = async (
   itemsCount: number = 14
 ): Promise<OrderResult> => {
   // 1. Логин
-  const loginResponse = await request.post('https://stage.dropp.market/medusa/store/auth', {
+  const loginResponse = await request.post('https://dev.dropp.market/medusa/store/auth', {
     data: {
       email: process.env.DROPP_EMAIL,
       password: process.env.DROPP_PASSWORD
@@ -59,7 +61,7 @@ export const createOrderWithMultipleItems = async (
 
   // 2. Получаем все товары
   console.log('📦 Загружаем каталог...');
-  const productsResponse = await request.get('https://stage.dropp.market/medusa/store/products', {
+  const productsResponse = await request.get('https://dev.dropp.market/medusa/store/products', {
     params: { limit: 999 }
   });
   
@@ -73,14 +75,14 @@ export const createOrderWithMultipleItems = async (
   
   // 3. Создаём корзину
   console.log('📦 Создаём корзину...');
-  const createCartResponse = await request.post('https://stage.dropp.market/medusa/store/carts');
+  const createCartResponse = await request.post('https://dev.dropp.market/medusa/store/carts');
   const cartData = await createCartResponse.json();
   const cart = cartData.cart || cartData;
   console.log(`🛒 Корзина: ${cart.id}`);
   
   // 4. Добавляем адрес доставки
   console.log('📦 Добавляем адрес доставки...');
-  await request.post(`https://stage.dropp.market/medusa/store/carts/${cart.id}`, {
+  await request.post(`https://dev.dropp.market/medusa/store/carts/${cart.id}`, {
     data: {
       shipping_address: {
         first_name: 'Nikolay',
@@ -127,7 +129,7 @@ export const createOrderWithMultipleItems = async (
     
     console.log(`🛍️ Товар ${orderItems.length + 1}: ${product.title} — ${price} ₽ (вариантов: ${suitableVariants.length})`);
     
-    const addItemResponse = await request.post(`https://stage.dropp.market/medusa/store/carts/${cart.id}/line-items`, {
+    const addItemResponse = await request.post(`https://dev.dropp.market/medusa/store/carts/${cart.id}/line-items`, {
       data: {
         variant_id: variant.id,
         quantity: 1
@@ -164,7 +166,7 @@ export const createOrderWithMultipleItems = async (
   console.log(`💰 Общая сумма: ${totalAmount} ₽`);
   
   // 6. Получаем актуальную сумму
-  const cartResponse = await request.get(`https://stage.dropp.market/medusa/store/carts/${cart.id}`);
+  const cartResponse = await request.get(`https://dev.dropp.market/medusa/store/carts/${cart.id}`);
   const cartData2 = await cartResponse.json();
   const cartTotalInKopecks = cartData2.cart?.total || 0;
   const finalTotal = Math.floor(cartTotalInKopecks / 100);
@@ -172,29 +174,30 @@ export const createOrderWithMultipleItems = async (
   
   // 7. Оформляем заказ
   console.log('📦 Оформляем заказ...');
-  const orderResponse = await request.post(`https://stage.dropp.market/medusa/store/carts/${cart.id}/complete`);
+  const orderResponse = await request.post(`https://dev.dropp.market/medusa/store/carts/${cart.id}/complete`);
   const orderData = await orderResponse.json();
   const order = orderData.data || orderData;
 
-  const orderNumber = (order.dropp_display_id || order.display_id || '').toString().replace(/^ARBC-/, '');
+  const displayId = (order.dropp_display_id || order.display_id || '').toString();
+  const orderNumber = displayId.replace(/^ARBC-/, '');
   console.log(`✅ Заказ создан: ARBC-${orderNumber}`);
   console.log(`🆔 ID заказа: ${order.id}`);
   console.log(`📦 Количество товаров в заказе: ${order.items?.length || orderItems.length}`);
   
   // 8. Оплачиваем (как в рабочих тестах)
   console.log('💳 Оплачиваем заказ...');
-  const paymentResponse = await request.post('https://stage.dropp.market/medusa/store/dropp/payment', {
+  const paymentResponse = await request.post('https://dev.dropp.market/medusa/store/dropp/payment', {
     data: {
       orderId: order.id,
       paymentProvider: 'mobi',
       language: 'ru-RU'
     }
   });
-  console.log(`💳 Оплата: ${paymentResponse.status()}`);
+  const paymentBody = await paymentResponse.text();
+  console.log(`💳 Оплата: ${paymentResponse.status()} ${paymentBody.slice(0, 800)}`);
 
   if (paymentResponse.status() !== 200) {
-    const errorText = await paymentResponse.text();
-    throw new Error(`❌ Ошибка оплаты заказа: ${paymentResponse.status()} — ${errorText.substring(0, 200)}`);
+    throw new Error(`❌ Ошибка оплаты заказа: ${paymentResponse.status()} — ${paymentBody.substring(0, 200)}`);
   }
 
   console.log(`\n🎉 ЗАКАЗ ОФОРМЛЕН И ОПЛАЧЕН!`);
@@ -207,6 +210,7 @@ export const createOrderWithMultipleItems = async (
 
   return {
     orderNumber,
+    displayId,
     orderId: order.id,
     totalAmount: finalTotal,
     itemsCount: orderItems.length,
